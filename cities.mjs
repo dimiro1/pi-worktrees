@@ -1,0 +1,23 @@
+// A curated worldwide pool, not a population ranking: city-proper and metro rankings differ.
+export const cities = Object.freeze([
+  'tokyo', 'delhi', 'shanghai', 'dhaka', 'sao-paulo', 'cairo', 'mexico-city', 'beijing', 'mumbai', 'osaka',
+  'chongqing', 'karachi', 'kinshasa', 'lagos', 'istanbul', 'buenos-aires', 'kolkata', 'manila', 'guangzhou', 'tianjin',
+  'lahore', 'bangalore', 'rio-de-janeiro', 'shenzhen', 'moscow', 'chennai', 'bogota', 'jakarta', 'paris', 'lima',
+  'bangkok', 'hyderabad', 'seoul', 'nagoya', 'london', 'chengdu', 'tehran', 'ho-chi-minh-city', 'luanda', 'wuhan',
+  'new-york', 'ahmedabad', 'kuala-lumpur', 'xian', 'hong-kong', 'dongguan', 'hangzhou', 'foshan', 'shenyang', 'riyadh',
+  'baghdad', 'santiago', 'surat', 'madrid', 'suzhou', 'pune', 'harbin', 'houston', 'dallas', 'toronto',
+  'miami', 'singapore', 'philadelphia', 'atlanta', 'fukuoka', 'khartoum', 'barcelona', 'johannesburg', 'saint-petersburg', 'qingdao',
+  'dalian', 'washington', 'yangon', 'alexandria', 'jinan', 'guadalajara', 'melbourne', 'ankara', 'sydney', 'helsinki',
+  'addis-ababa', 'nairobi', 'hanoi', 'monterrey', 'cape-town', 'durban', 'kabul', 'casablanca', 'kunming', 'changsha',
+  'zhengzhou', 'changchun', 'taiyuan', 'hefei', 'nanjing', 'ningbo', 'fuzhou', 'xiamen', 'wuxi', 'nanning',
+  'los-angeles', 'chicago', 'phoenix', 'san-antonio', 'san-diego', 'san-francisco', 'seattle', 'boston', 'denver', 'detroit',
+  'portland', 'las-vegas', 'austin', 'nashville', 'new-orleans', 'vancouver', 'montreal', 'ottawa', 'calgary', 'quebec-city',
+  'brasilia', 'salvador', 'fortaleza', 'belo-horizonte', 'recife', 'curitiba', 'porto-alegre', 'manaus', 'belem', 'goiania',
+  'caracas', 'quito', 'medellin', 'cali', 'cordoba', 'rosario', 'montevideo', 'asuncion', 'la-paz', 'santa-cruz',
+  'rome', 'milan', 'naples', 'turin', 'berlin', 'hamburg', 'munich', 'cologne', 'frankfurt', 'vienna',
+  'prague', 'warsaw', 'krakow', 'budapest', 'bucharest', 'sofia', 'belgrade', 'zagreb', 'ljubljana', 'sarajevo',
+  'athens', 'thessaloniki', 'lisbon', 'porto', 'valencia', 'seville', 'amsterdam', 'rotterdam', 'brussels', 'antwerp',
+  'copenhagen', 'stockholm', 'oslo', 'reykjavik', 'dublin', 'edinburgh', 'glasgow', 'manchester', 'birmingham', 'liverpool',
+  'zurich', 'geneva', 'lyon', 'marseille', 'toulouse', 'nice', 'kyoto', 'kobe', 'sapporo', 'hiroshima',
+  'busan', 'taipei', 'kaohsiung', 'auckland', 'wellington', 'brisbane', 'perth', 'adelaide', 'dubai', 'abu-dhabi',
+]);
