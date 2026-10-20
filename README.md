@@ -63,20 +63,6 @@ Use `/wt help` for the complete syntax. Commands complete their action names.
 
 ## Navigation and output
 
-Menus use Pi's selection keybindings: **Down/Up**, Enter to select, and Escape to
-cancel. For optional **Ctrl+N / Ctrl+P** navigation, merge these actions into
-`~/.pi/agent/keybindings.json` and run `/reload`:
-
-```json
-{
-  "tui.select.down": ["down", "ctrl+n"],
-  "tui.select.up": ["up", "ctrl+p"]
-}
-```
-
-These apply to Pi selection lists, not the main editor's model-cycling shortcut.
-The extension does not modify your keybindings.
-
 Slash commands default to human-readable output: lists show each checkout's name,
 branch, path, current/primary markers and any locks; status clearly says whether the
 working tree is clean and shows local changes when present. Agent tool results are
