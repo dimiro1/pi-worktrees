@@ -40,6 +40,11 @@ To update a package installation:
 pi update git:github.com/dimiro1/pi-worktrees
 ```
 
+Then run `/reload` in each open Pi session that uses the extension. A full process
+restart is not required. Runtime helpers use `.ts` imports so Pi's reload-aware
+loader refreshes the complete extension, rather than retaining native `.mjs`
+modules in Node's ESM cache.
+
 ## A complete working session
 
 ```text
@@ -236,7 +241,9 @@ Tests use throwaway repositories, not your project. `manager.test.mjs` tests Git
 operations independently of Pi; `extension.test.mjs` and `regressions.test.mjs`
 load the extension through the installed Pi loader and test command/tool dispatch,
 confirmations, cancellation, queue progress, nested checkouts and aliases without
-any model requests. Loader tests use the locally installed Pi development
+any model requests. `reload.test.mjs` edits imported helpers and reloads the real
+extension repeatedly in the same process, checking both agent tool calls and slash
+commands. It covers newly exported helpers and updates to existing exports. Loader tests use the locally installed Pi development
 dependency. `PI_PACKAGE_DIR` can override it; running from a personal extension
 without local dependencies also supports Pi's managed-install layout.
 

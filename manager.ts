@@ -6,7 +6,24 @@ import { realpathSync } from 'node:fs';
 import { basename, dirname, join, resolve, relative, isAbsolute } from 'node:path';
 
 const exec = promisify(execFile);
-import { cities } from './cities.mjs';
+import { cities } from './cities.ts';
+export interface WorktreeInfo {
+  path: string;
+  branch: string | null;
+  head?: string;
+  locked: boolean;
+  lockReason?: string;
+  prunable: boolean;
+  bare: boolean;
+}
+interface CreateOptions {
+  name?: string;
+  base?: string;
+  branch?: string;
+  prefix?: string;
+  existing?: boolean;
+}
+
 export const randomName = () => cities[randomInt(cities.length)];
 export function validateName(name) {
   if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$/.test(name)) throw new Error('Names must be 1–80 letters, digits, hyphens or underscores; no paths.');
@@ -16,28 +33,29 @@ export function inside(parent, child) {
   const rel = relative(parent, child);
   return rel === '' || (!rel.startsWith(`..${process.platform === 'win32' ? '\\' : '/'}`) && rel !== '..' && !isAbsolute(rel));
 }
-export function canonicalPath(path) {
+export function canonicalPath(path: string): string {
   path = resolve(path);
   try { return realpathSync(path); }
   catch (error) {
-    if (error.code !== 'ENOENT' && error.code !== 'ENOTDIR') throw error;
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code !== 'ENOENT' && code !== 'ENOTDIR') throw error;
     // A suspended session's subdirectory may have disappeared; its symlinked
     // ancestors still identify the checkout that must remain protected.
     const parent = dirname(path);
     return parent === path ? path : join(canonicalPath(parent), basename(path));
   }
 }
-export function currentWorktree(trees, cwd) {
+export function currentWorktree(trees: WorktreeInfo[], cwd: string): WorktreeInfo | undefined {
   const path = canonicalPath(cwd);
   return trees.filter(w => !w.bare && inside(canonicalPath(w.path), path))
     .sort((a, b) => canonicalPath(b.path).length - canonicalPath(a.path).length)[0];
 }
-export function checkCancelled(signal) {
+export function checkCancelled(signal?: AbortSignal) {
   if (signal?.aborted) throw new Error('Cancelled before worktree operation.');
 }
-export function parseWorktrees(text) {
-  const result = [];
-  let item;
+export function parseWorktrees(text: string): WorktreeInfo[] {
+  const result: WorktreeInfo[] = [];
+  let item: WorktreeInfo | undefined;
   for (const field of text.split('\0')) {
     if (field.startsWith('worktree ')) { item = { path: field.slice(9), branch: null, locked: false, prunable: false, bare: false }; result.push(item); }
     else if (item && field.startsWith('branch ')) item.branch = field.slice(7).replace(/^refs\/heads\//, '');
@@ -49,14 +67,19 @@ export function parseWorktrees(text) {
   return result;
 }
 export class Worktrees {
-  constructor(cwd, { signal } = {}) { this.cwd = cwd; this.signal = signal; }
-  async git(...args) {
+  cwd: string;
+  signal?: AbortSignal;
+  constructor(cwd: string, { signal }: { signal?: AbortSignal } = {}) { this.cwd = cwd; this.signal = signal; }
+  async git(...args: string[]): Promise<string> {
     // Do not interrupt a mutation already handed to Git: cancellation is not rollback.
     checkCancelled(this.signal);
     try {
       const { stdout, stderr } = await exec('git', ['-C', this.cwd, ...args], { encoding: 'utf8', maxBuffer: 8 * 1024 * 1024, timeout: 30000, env: { ...process.env, GIT_TERMINAL_PROMPT: '0' } });
       return args[0] === 'worktree' && args[1] === 'prune' ? stdout + stderr : stdout;
-    } catch (error) { throw new Error(error.stderr?.trim() || error.message); }
+    } catch (error) {
+      const failure = error as Error & { stderr?: string };
+      throw new Error(failure.stderr?.trim() || failure.message);
+    }
   }
   async list() { return parseWorktrees(await this.git('worktree', 'list', '--porcelain', '-z')); }
   async current() {
@@ -89,15 +112,14 @@ export class Worktrees {
     if (parents.some(parent => inside(path, canonicalPath(parent)))) throw new Error('A suspended parent Pi session uses this worktree. Return with /quit first.');
     if (item.locked) throw new Error('Worktree is locked. Unlock it explicitly first.');
   }
-  async prefix(value) {
+  async prefix(value?: string) {
     if (value === undefined) return (await this.git('config', '--local', '--default', 'pi/', '--get', 'pi.worktreeBranchPrefix')).trim();
     const prefix = value && !value.endsWith('/') ? `${value}/` : value;
     await this.git('check-ref-format', '--branch', `${prefix}example`);
     await this.git('config', '--local', 'pi.worktreeBranchPrefix', prefix);
     return prefix;
   }
-  /** @param {{name?: string, base?: string, branch?: string, prefix?: string, existing?: boolean}} [options] */
-  async create({ name, base = 'HEAD', branch, prefix, existing = false } = {}) {
+  async create({ name, base = 'HEAD', branch, prefix, existing = false }: CreateOptions = {}) {
     if (existing && !branch) throw new Error('--existing requires --branch.');
     if (prefix !== undefined && (branch !== undefined || existing)) throw new Error('--prefix cannot combine with --branch or --existing.');
     if (branch === undefined) {
@@ -115,7 +137,7 @@ export class Worktrees {
         const candidate = available.splice(randomInt(available.length), 1)[0];
         try { await access(join(root, candidate)); }
         catch (error) {
-          if (error.code !== 'ENOENT') throw error;
+          if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
           name = candidate;
           break;
         }
@@ -170,7 +192,7 @@ export class Worktrees {
     let note = 'Branch preserved.';
     if (deleteBranch && item.branch) {
       try { await this.git('branch', '-d', '--', item.branch); note = 'Merged branch deleted.'; }
-      catch (error) { note = `Worktree removed; branch preserved: ${error.message}`; }
+      catch (error) { note = `Worktree removed; branch preserved: ${(error as Error).message}`; }
     }
     return { removed: item.path, branch: item.branch, note };
   }
@@ -188,8 +210,8 @@ export class Worktrees {
 }
 
 // Small argv reader, not a shell: quotes group paths; nothing is expanded or executed.
-export function words(input) {
-  const result = [];
+export function words(input: string): string[] {
+  const result: string[] = [];
   let word = '', quote = '', started = false;
   for (const ch of input.trim()) {
     if (quote) { if (ch === quote) quote = ''; else word += ch; started = true; }
@@ -201,8 +223,9 @@ export function words(input) {
   if (started) result.push(word);
   return result;
 }
-export function options(args, allowed) {
-  const positional = [], flags = {};
+export function options(args: string[], allowed: Record<string, string>) {
+  const positional: string[] = [];
+  const flags: Record<string, string | boolean | undefined> = {};
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     if (!arg.startsWith('--')) { positional.push(arg); continue; }

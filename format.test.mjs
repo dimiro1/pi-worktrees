@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { humanResult } from './format.mjs';
+import { humanResult } from './format.ts';
 
 const primary = { path: '/repo', branch: 'master', locked: false, prunable: false, head: '123456789abcdef' };
 const linked = { ...primary, path: '/worktrees/kyoto', branch: 'pi/kyoto' };

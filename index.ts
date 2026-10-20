@@ -3,9 +3,10 @@ import { basename } from 'node:path';
 import { Type } from '@earendil-works/pi-ai';
 import { getMarkdownTheme, type ExtensionAPI, type ExtensionContext, type ExtensionCommandContext } from '@earendil-works/pi-coding-agent';
 import { Markdown } from '@earendil-works/pi-tui';
-import { Worktrees, words, options, canonicalPath, currentWorktree, checkCancelled } from './manager.mjs';
-import { humanResult } from './format.mjs';
-import { createMailbox, returnToParent } from './navigation.mjs';
+// Keep runtime helpers in .ts: Pi can reload them without Node's native ESM cache.
+import { Worktrees, words, options, canonicalPath, currentWorktree, checkCancelled } from './manager.ts';
+import { humanResult } from './format.ts';
+import { createMailbox, returnToParent } from './navigation.ts';
 
 const HELP = `Worktrees — /worktree or /wt
 
@@ -111,6 +112,10 @@ async function run(args: string[], ctx: ExtensionContext, commandCtx?: Extension
   };
   if (!definitions[action]) throw new Error(`Unknown action: ${action}. Use /wt help.`);
   const { positional: pos, flags } = options(args, definitions[action]);
+  const valueFlag = (name: string) => {
+    const value = flags[name];
+    return typeof value === 'string' ? value : undefined;
+  };
   const arity: Record<string, [number, number]> = { help: [0, 0], list: [0, 0], prefix: [0, 1], create: [0, 1], switch: [0, 1], status: [0, 1], path: [0, 1], rename: [2, 2], branch: [2, 2], remove: [1, 1], lock: [1, 1], unlock: [1, 1], prune: [0, 0] };
   if (pos.length < arity[action][0] || pos.length > arity[action][1]) throw new Error(`Wrong arguments for ${action}. Use /wt help.`);
   if (action === 'help') return HELP;
@@ -119,7 +124,7 @@ async function run(args: string[], ctx: ExtensionContext, commandCtx?: Extension
   if (action === 'create') {
     if (flags.existing && (!flags.branch || flags.base !== undefined)) throw new Error('--existing requires --branch and cannot combine with --base.');
     if (flags.switch && !commandCtx) throw new Error('Use /wt create --switch in the terminal; tools cannot switch sessions.');
-    const item = await manager.create({ name: pos[0], base: flags.base, branch: flags.branch, prefix: flags.prefix, existing: !!flags.existing });
+    const item = await manager.create({ name: pos[0], base: valueFlag('base'), branch: valueFlag('branch'), prefix: valueFlag('prefix'), existing: !!flags.existing });
     ctx.ui.notify(`Created ${item.branch} at ${item.path}`, 'info');
     if (flags.switch) await openWorktree(item.path, false, commandCtx!);
     return item;
@@ -141,7 +146,7 @@ async function run(args: string[], ctx: ExtensionContext, commandCtx?: Extension
   }
   if (action === 'rename') return manager.rename(pos[0], pos[1]);
   if (action === 'branch') return manager.renameBranch(pos[0], pos[1]);
-  if (action === 'lock') return manager.lock(pos[0], flags.reason);
+  if (action === 'lock') return manager.lock(pos[0], valueFlag('reason'));
   if (action === 'unlock') return manager.unlock(pos[0]);
   if (action === 'remove') {
     const item = await manager.find(pos[0]);

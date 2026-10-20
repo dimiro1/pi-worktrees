@@ -4,8 +4,8 @@ import { mkdtemp, rm, mkdir, realpath } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { Worktrees } from './manager.mjs';
-import { createMailbox } from './navigation.mjs';
+import { Worktrees } from './manager.ts';
+import { createMailbox } from './navigation.ts';
 
 import { loadPiExtensions } from './test-support.mjs';
 

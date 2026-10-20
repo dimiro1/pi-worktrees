@@ -1,6 +1,6 @@
 {
   "name": "pi-worktrees",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Git worktree management and isolated Pi sessions with /wt and /worktree.",
   "type": "module",
   "license": "MIT",
@@ -15,7 +15,7 @@
   "engines": {
     "node": ">=22.19.0"
   },
-  "files": ["index.ts", "manager.mjs", "navigation.mjs", "format.mjs", "cities.mjs", "README.md", "LICENSE"],
+  "files": ["index.ts", "manager.ts", "navigation.ts", "format.ts", "cities.ts", "README.md", "LICENSE"],
   "pi": {
     "extensions": ["./index.ts"]
   },

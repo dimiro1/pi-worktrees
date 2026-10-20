@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { existsSync, statSync, mkdtempSync, mkdirSync, symlinkSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { createMailbox, returnToParent } from './navigation.mjs';
+import { createMailbox, returnToParent } from './navigation.ts';
 
 test('a return request unwinds to the requested ancestor without reopening its session', () => {
   const outer = createMailbox();

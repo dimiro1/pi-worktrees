@@ -1,7 +1,7 @@
 import { mkdtempSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { canonicalPath } from './manager.mjs';
+import { canonicalPath } from './manager.ts';
 
 // Each suspended parent owns a private mailbox. Children only ask it to return;
 // no process changes cwd or opens a second copy of a suspended conversation.

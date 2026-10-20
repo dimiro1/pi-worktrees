@@ -3,7 +3,7 @@ import { dirname, join } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-export async function loadPiExtensions() {
+export async function loadPiLoader() {
   let packageDir = process.env.PI_PACKAGE_DIR;
   if (!packageDir) {
     try {
@@ -16,6 +16,9 @@ export async function loadPiExtensions() {
       packageDir = join(agentDir, 'install/releases', version, 'node_modules/@earendil-works/pi-coding-agent');
     }
   }
-  const { loadExtensions } = await import(pathToFileURL(join(packageDir, 'dist/core/extensions/loader.js')).href);
-  return loadExtensions;
+  return import(pathToFileURL(join(packageDir, 'dist/core/extensions/loader.js')).href);
+}
+
+export async function loadPiExtensions() {
+  return (await loadPiLoader()).loadExtensions;
 }

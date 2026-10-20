@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { mkdtemp, rm, writeFile, mkdir, symlink, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { Worktrees, randomName, validateName, words, options, parseWorktrees } from './manager.mjs';
-import { cities } from './cities.mjs';
+import { Worktrees, randomName, validateName, words, options, parseWorktrees } from './manager.ts';
+import { cities } from './cities.ts';
 
 async function repository(t) {
   const temp = await mkdtemp(join(tmpdir(), 'pi-worktrees-test-'));

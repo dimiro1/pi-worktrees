@@ -1,5 +1,5 @@
 import { basename } from 'node:path';
-import { canonicalPath, currentWorktree } from './manager.mjs';
+import { canonicalPath, currentWorktree } from './manager.ts';
 
 // Git paths and branch names are data, not Markdown (or terminal escape sequences).
 const clean = value => String(value ?? '').replace(/[\x00-\x1f\x7f]/g, ' ');
@@ -7,7 +7,7 @@ const escape = value => clean(value).replace(/[\\`*_{}\[\]<>#!|]/g, '\\$&');
 const code = value => `\`${clean(value).replace(/`/g, '\\`')}\``;
 
 function describe(item, current, primary = false) {
-  const labels = [];
+  const labels: string[] = [];
   if (current) labels.push('current');
   if (primary) labels.push('primary');
   if (item.locked) labels.push('locked');
